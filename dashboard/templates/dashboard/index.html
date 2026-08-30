@@ -1,0 +1,1514 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedicalMelissa</title>
+    <link rel="stylesheet" href="{% static 'dashboard/style.css' %}" />
+  </head>
+
+  <body data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+    <header>
+      <div>
+       <h1>🩺 {{ clinic_name }}</h1>
+        <p>Une solution intelligente pour une gestion médicale simple et sécurisée.</p>
+      </div>
+      {% if not user.is_authenticated %}
+  <button id="auth-btn" type="button" class="auth-toggle-btn">Se connecter</button>
+{% endif %}
+    </header>
+
+    <nav>
+      <a href="#dashboard">Tableau de bord</a>
+      <a href="#accueil">Accueil</a>
+      <a href="#patients">Patients</a>
+      <a href="#rendez-vous">Rendez-vous</a>
+      <a href="#dossiers">Dossiers médicaux</a>
+      <a href="#factures">Factures</a>
+      <a href="#conseils">Conseils médicaux</a>
+      <a href="#aide">Aide</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <main>
+      <div id="public-view" {% if user.is_authenticated %}style="display: none;"{% endif %}>
+
+        <section id="accueil">
+          <h2>Bienvenue dans votre espace médicale</h2>
+          <p>
+            Une plateforme confortable pour la gestion médicale. Gérez vos patients,
+            organisez vos rendez-vous et simplifiez votre travail quotidien avec 🩺 MedicalMelissa.
+          </p>
+
+          <div class="home-visuals">
+            <div class="home-visual-card">
+              <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=900&q=80" alt="Docteur moderne en clinique" />
+              <div class="visual-overlay">
+                <span>Care clinic</span>
+              </div>
+            </div>
+            <div class="home-visual-card ai-card">
+              <img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=900&q=80" alt="Médecine assistée par intelligence artificielle" />
+              <div class="visual-overlay dark">
+                <span>AI medical</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="home-message" style="margin-top: 1rem; padding: 1rem; background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; color: #1d4ed8;">
+            Accueil : votre espace santé est prêt à être utilisé après connexion.
+          </div>
+        </section>
+
+        <section>
+          <h2>Pourquoi choisir MedicalMelissa ?</h2>
+          <ul>
+            <li>Interface simple et confortable</li>
+            <li>Organisation rapide des consultations</li>
+            <li>Gestion moderne des informations médicales</li>
+            <li>Gain de temps pour les professionnels de santé</li>
+          </ul>
+          <button id="auth-btn-secondary" type="button" class="auth-toggle-btn">
+            Connectez-vous pour accéder à l'espace santé
+          </button>
+        </section>
+      </div>
+
+      <div id="dashboard-view" {% if not user.is_authenticated %}style="display: none;"{% endif %}>
+           <form method="post" action="{% url 'logout' %}" style="margin-bottom: 1rem;">
+    {% csrf_token %}
+    <button type="submit">Se déconnecter</button>
+</form>
+        <section id="dashboard">
+          <h2>Tableau de Bord Practicien</h2>
+          <p id="doctor-welcome-text">
+  Bienvenue {{ doctor_name }}. Voici l'activité enregistrée pour aujourd'hui.
+</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 1rem; margin-bottom: 1rem;">
+            <button id="add-patient-btn" type="button" style="flex: 1 1 220px; min-width: 220px;">Ajouter un patient</button>
+            <button id="add-appointment-btn" type="button" style="flex: 1 1 220px; min-width: 220px;">Prendre un rendez-vous</button>
+            <button id="create-invoice-btn" type="button" style="flex: 1 1 220px; min-width: 220px;">Ajouter et créer une facture</button>
+          </div>
+        </section>
+
+        <article id="patients">
+          <h3>👤 Gestion des patients</h3>
+
+          <form id="patient-form" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #dbeafe; background: #f8fbff; border-radius: 8px;">
+            <div style="display: grid; gap: 0.75rem;">
+              <input id="patient-time" type="text" placeholder="Heure" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <input id="patient-name" type="text" placeholder="Nom et prénom" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <select id="patient-gender" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <option value="">Genre</option>
+                <option value="Féminin">Féminin</option>
+                <option value="Masculin">Masculin</option>
+              </select>
+              <input id="patient-birthdate" type="date" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <input id="patient-reason" type="text" placeholder="Motif" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <input id="patient-status" type="text" placeholder="Statut" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <button type="submit">Enregistrer le patient</button>
+            </div>
+          </form>
+
+          <div class="table-wrapper">
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Heure</th>
+                <th>Nom & prénom</th>
+                <th>Genre</th>
+                <th>Date de naissance</th>
+                <th>Motif</th>
+                <th>Statut</th>
+                <th colspan="2">Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="patients-list"></tbody>
+    </table>
+</div>
+        </article>
+
+        <article id="rendez-vous">
+          <h3>🗓️ Créneaux de rendez-vous pour aujourd'hui</h3>
+
+          <form id="appointment-form" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #fef3c7; background: #fffbeb; border-radius: 8px;">
+            <div style="display: grid; gap: 0.75rem;">
+              <input id="appointment-time" type="text" placeholder="Heure (ex: 11:30 - 12:00)" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <input id="appointment-type" type="text" placeholder="Type de consultation" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <input id="appointment-status" type="text" placeholder="Disponibilité (oui/non)" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <button type="submit">Enregistrer le rendez-vous</button>
+            </div>
+          </form>
+
+          <div class="table-wrapper">
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Heure</th>
+                <th>Type</th>
+                <th>Disponibilité</th>
+                <th colspan="2">Action</th>
+            </tr>
+        </thead>
+        <tbody id="appointments-list"></tbody>
+    </table>
+</div>
+          <p>Organiser les consultations et éviter les conflits de planning.</p>
+          <button type="button">Gérer les rendez-vous</button>
+        </article>
+
+        <article id="dossiers" style="padding: 1rem; background: linear-gradient(135deg, #ecfeff 0%, #f0fdf4 100%); border: 1px solid #a5f3fc; border-radius: 14px;">
+          <h3>📄 Dossiers médicaux</h3>
+          <p>Consultez, mettez à jour et enregistrez les informations médicales de chaque patient.</p>
+
+          <div style="margin-bottom: 1rem; display: grid; gap: 0.75rem;">
+            <label for="dossier-patient-select" style="font-weight: 600;">Patient</label>
+            <select id="dossier-patient-select" style="padding: 0.75rem; border: 1px solid #a5f3fc; border-radius: 8px; background: white;">
+              <option value="">Choisir un patient</option>
+            </select>
+          </div>
+
+          <form id="dossier-form" style="display: grid; gap: 0.75rem; margin-bottom: 1rem; padding: 1rem; background: rgba(255,255,255,0.9); border: 1px solid #b6f5d9; border-radius: 12px;">
+            <input id="dossier-name" type="text" placeholder="Nom du patient" style="padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;" />
+            <input id="dossier-birthdate" type="date" style="padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;" />
+            <input id="dossier-diagnosis" type="text" placeholder="Diagnostic" style="padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;" />
+            <input id="dossier-treatment" type="text" placeholder="Traitement" style="padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;" />
+            <input id="dossier-last-visit" type="date" style="padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px;" />
+            <textarea id="dossier-notes" rows="4" placeholder="Notes médicales, observations, recommandations..." style="padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; resize: vertical;"></textarea>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button type="submit">Enregistrer le dossier</button>
+              <button id="dossier-new-btn" type="button">Nouveau dossier</button>
+              <button id="dossier-delete-btn" type="button" style="background: #ef4444; color: white;">Supprimer le dossier</button>
+            </div>
+          </form>
+
+          <div id="dossier-summary" style="padding: 1rem; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; color: #166534;">
+            Aucun dossier sélectionné pour le moment.
+          </div>
+        </article>
+
+        <article id="factures">
+          <h3>Factures</h3>
+
+          <form id="invoice-form" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #dcfce7; background: #f7fff8; border-radius: 8px;">
+            <div style="display: grid; gap: 0.75rem;">
+              <input id="invoice-id" type="text" placeholder="N° facture" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <input id="invoice-patient" type="text" placeholder="Patient" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <input id="invoice-amount" type="number" placeholder="Prix complet" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <input id="invoice-paid" type="number" placeholder="Versé" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <select id="invoice-status" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <option value="">Statut</option>
+                <option value="Complet">Complet</option>
+                <option value="Versé">Versé</option>
+                <option value="Partiellement versé">Partiellement versé</option>
+              </select>
+              <input id="invoice-due-date" type="text" placeholder="Échéance" style="padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <button type="submit">Enregistrer la facture</button>
+            </div>
+          </form>
+
+          <div class="table-wrapper">
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>N° facture</th>
+                <th>Patient</th>
+                <th>Prix complet</th>
+                <th>Versé</th>
+                <th>Reste</th>
+                <th>Échéance</th>
+                <th>Statut</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="invoices-list"></tbody>
+    </table>
+</div>
+        </article>
+
+        <article id="conseils">
+          <h3>💡 Conseils médicaux</h3>
+          <p>Partager des recommandations et informations utiles.</p>
+          <button id="show-advice-btn" type="button">Voir les conseils</button>
+          <div id="advice-box" style="display: none; margin-top: 1rem; padding: 1rem; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; color: #166534;">
+            <strong>Conseil du jour :</strong>
+            <span id="advice-text">Boire suffisamment d’eau, dormir 7 à 8 heures et suivre les traitements prescrits aide à mieux gérer la santé au quotidien.</span>
+          </div>
+        </article>
+
+        <article id="aide" style="background: linear-gradient(135deg, #f8fbff 0%, #ecfeff 100%); border: 1px solid #bae6fd; border-radius: 20px; padding: 1.5rem;">
+          <h3>🆘 Centre d’aide du praticien</h3>
+          <p>Voici le guide rapide pour utiliser MedicalMelissa correctement.</p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div style="background: white; border: 1px solid #dbeafe; border-radius: 14px; padding: 1rem;">
+              <strong>1. Ajouter un patient</strong>
+              <p style="margin-top: 0.5rem;">Clique sur <strong>Ajouter un patient</strong>, remplis l’heure, le nom, le genre, la date de naissance, le motif et le statut, puis clique sur <strong>Enregistrer le patient</strong>.</p>
+            </div>
+            <div style="background: white; border: 1px solid #dbeafe; border-radius: 14px; padding: 1rem;">
+              <strong>2. Gérer les rendez-vous</strong>
+              <p style="margin-top: 0.5rem;">Va dans <strong>Rendez-vous</strong>, ajoute l’heure, le type de consultation et la disponibilité. Tu peux aussi modifier ou supprimer un créneau.</p>
+            </div>
+            <div style="background: white; border: 1px solid #dbeafe; border-radius: 14px; padding: 1rem;">
+              <strong>3. Gérer les dossiers</strong>
+              <p style="margin-top: 0.5rem;">Dans <strong>Dossiers médicaux</strong>, choisis un patient, complète le diagnostic, le traitement, la date de dernière visite et les notes, puis enregistre.</p>
+            </div>
+            <div style="background: white; border: 1px solid #dbeafe; border-radius: 14px; padding: 1rem;">
+              <strong>4. Gérer les factures</strong>
+              <p style="margin-top: 0.5rem;">Dans <strong>Factures</strong>, saisis le prix complet, le montant versé et l’échéance. Le reste à payer est calculé automatiquement.</p>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.2rem; padding: 1rem; background: rgba(255,255,255,0.8); border: 1px solid #bfdbfe; border-radius: 12px;">
+            <strong>Astuce :</strong>
+            <p style="margin-top: 0.5rem;">Tu peux modifier ou supprimer un patient, un rendez-vous ou une facture directement depuis leur tableau. Les données restent enregistrées dans le navigateur.</p>
+          </div>
+        </article>
+
+        <section id="contact" style="padding: 1.5rem; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 18px;">
+          <aside style="display: grid; gap: 1.5rem;">
+            <div>
+              <h3 style="margin-bottom: 0.5rem; font-size: 1.8rem;">📞 Contact & assistance</h3>
+              <p style="margin: 0; color: #334155;">Notre équipe médicale est à votre écoute pour répondre à vos demandes.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+              <div style="padding: 1rem; background: white; border: 1px solid #dbeafe; border-radius: 12px; box-shadow: 0 4px 12px rgba(59,130,246,0.08);">
+                <strong>📱 Téléphone</strong>
+                <p style="margin: 0.5rem 0 0;">{{ clinic_phone }}</p>
+              </div>
+              <div style="padding: 1rem; background: white; border: 1px solid #dbeafe; border-radius: 12px; box-shadow: 0 4px 12px rgba(59,130,246,0.08);">
+                <strong>✉️ Email</strong>
+                <p style="margin: 0.5rem 0 0;">{{ clinic_phone }}</p>
+              </div>
+              <div style="padding: 1rem; background: white; border: 1px solid #dbeafe; border-radius: 12px; box-shadow: 0 4px 12px rgba(59,130,246,0.08);">
+                <strong>🕒 Horaires</strong>
+                <p style="margin: 0.5rem 0 0;">Lun - Sam : 08:00 - 18:00</p>
+              </div>
+            </div>
+
+            <form id="contact-form" style="display: grid; gap: 0.85rem; padding: 1.2rem; border: 1px solid #dbeafe; background: rgba(255,255,255,0.9); border-radius: 14px; box-shadow: 0 6px 18px rgba(15,23,42,0.04);">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem;">
+                <input id="contact-name" type="text" placeholder="Votre nom" style="padding: 0.8rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.96rem;" />
+                <input id="contact-email" type="email" placeholder="Votre email" style="padding: 0.8rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.96rem;" />
+              </div>
+
+              <select id="contact-subject" style="padding: 0.8rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.96rem; background: white;">
+                <option value="">Objet du message</option>
+                <option>Question sur un patient</option>
+                <option>Demande de rendez-vous</option>
+                <option>Facture et paiement</option>
+                <option>Support technique</option>
+                <option>Autre</option>
+              </select>
+
+              <textarea id="contact-message" rows="5" placeholder="Décrivez votre demande ou votre message..." style="padding: 0.8rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 10px; resize: vertical; font-size: 0.96rem;"></textarea>
+
+              <button type="submit" style="padding: 0.85rem 1.1rem; border: none; border-radius: 10px; background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; font-weight: 700; cursor: pointer;">Envoyer le message</button>
+            </form>
+
+            <div id="contact-success" style="display: none; margin-top: 0.2rem; padding: 0.9rem 1rem; border-radius: 10px; background: #ecfdf5; color: #166534; border: 1px solid #86efac;">
+              Votre message a bien été envoyé. Nous vous répondrons rapidement.
+            </div>
+
+            <button id="support-btn" type="button" style="padding: 0.8rem 1rem; border: 1px solid #0ea5e9; background: white; border-radius: 10px; color: #0f172a; font-weight: 600; cursor: pointer;">Contactez-nous</button>
+          </aside>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2026 🩺 {{ clinic_name }}</p>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+        const publicView = document.getElementById('public-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const authButtons = document.querySelectorAll('.auth-toggle-btn');
+        const loginForm = document.getElementById('login-form');
+        const doctorNameInput = document.getElementById('doctor-name');
+        const doctorPasswordInput = document.getElementById('doctor-password');
+        const loginError = document.getElementById('login-error');
+        const loginPanel = document.getElementById('login-panel');
+        const doctorWelcomeText = document.getElementById('doctor-welcome-text');
+        const togglePasswordButton = document.getElementById('toggle-password-visibility');
+        const patientsTableBody = document.getElementById('patients-list');
+        const invoicesTableBody = document.getElementById('invoices-list');
+        const dashboardPages = ['#dashboard', '#patients', '#rendez-vous', '#dossiers', '#factures', '#conseils', '#aide', '#contact']
+          .map((id) => document.querySelector(id))
+          .filter(Boolean);
+
+        
+
+        function normalizeDoctorName(value) {
+          return value.trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function showDashboardPage(targetId = '#dashboard') {
+          const pageKey = targetId.replace('#', '');
+
+          dashboardPages.forEach((page) => {
+            const isVisible = page.id === pageKey;
+            page.style.display = isVisible ? 'block' : 'none';
+          });
+
+          const activePage = document.querySelector(targetId);
+          if (activePage) {
+            activePage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+
+        const STORAGE_KEYS = {
+          patients: 'medicalmelissa_patients',
+          invoices: 'medicalmelissa_invoices',
+          appointments: 'medicalmelissa_appointments'
+        };
+
+        function loadSavedData(key, fallback) {
+          try {
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+          } catch (error) {
+            return fallback;
+          }
+        }
+
+        function saveData(key, data) {
+          localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        const patients = loadSavedData(STORAGE_KEYS.patients, [
+          { time: '10:30', name: 'AMINA BENALI', gender: 'Féminin', birthDate: '1995-02-15', reason: 'SUIVI D\'ANALYSE', status: 'EN ATTENTE' }
+        ]);
+
+        const invoices = loadSavedData(STORAGE_KEYS.invoices, [
+          { id: 'FAC-2026-081', patient: 'PIERRE DURAND', amount: 5000, paid: 3000, dueDate: "Aujourd'hui", status: 'Partiellement versé' }
+        ]);
+
+        const appointments = loadSavedData(STORAGE_KEYS.appointments, [
+          { id: 101, time: '11:30 - 12:00', type: 'Consultation libre', available: true },
+          { id: 102, time: '15:30 - 16:00', type: 'Consultation libre', available: true }
+        ]);
+        async function loadAppointmentsFromDjango() {
+  try {
+    const response = await fetch('/api/appointments/');
+
+    if (!response.ok) {
+      console.error('Erreur lors du chargement des rendez-vous.');
+      return;
+    }
+
+    const data = await response.json();
+
+    appointments.splice(0, appointments.length);
+
+    data.forEach((appointment) => {
+      appointments.push({
+        id: appointment.id,
+        time: appointment.time,
+        type: appointment.reason,
+        available: appointment.status !== 'Annulé'
+      });
+    });
+
+    renderAppointments();
+  } catch (error) {
+    console.error('Erreur de connexion à Django :', error);
+  }
+}
+  async function loadPatientsFromDjango() {
+  try {
+    const response = await fetch('/api/patients/');
+
+    if (!response.ok) {
+      console.error('Erreur lors du chargement des patients.');
+      return;
+    }
+
+    const data = await response.json();
+
+    patients.splice(0, patients.length);
+
+    data.forEach((patient) => {
+      patients.push({
+        id: patient.id,
+        time: patient.time,
+        name: patient.name,
+        gender: patient.gender,
+        birthDate: patient.birthDate,
+        reason: patient.reason,
+        status: patient.status
+      });
+    });
+
+    renderPatients();
+
+  } catch (error) {
+    console.error('Erreur de connexion à Django :', error);
+  }
+}
+
+        function renderPatients() {
+          if (!patientsTableBody) return;
+          patientsTableBody.innerHTML = patients.map((patient, index) => `
+            <tr>
+              <td>${patient.time}</td>
+              <td>${patient.name}</td>
+              <td>${patient.gender || '—'}</td>
+              <td>${patient.birthDate || '—'}</td>
+              <td>${patient.reason}</td>
+              <td>${patient.status}</td>
+              <td>
+                <button type="button" data-patient-index="${index}">Modifier</button>
+              </td>
+              <td>
+                <button type="button" data-patient-delete="${index}">Supprimer</button>
+              </td>
+            </tr>
+          `).join('');
+
+         document.querySelectorAll('[data-patient-index]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const index = Number(button.dataset.patientIndex);
+    const patient = patients[index];
+
+    if (!patient) return;
+
+    const updatedTime = prompt('Heure :', patient.time);
+    if (updatedTime === null) return;
+
+    const updatedName = prompt('Nom et prénom :', patient.name);
+    if (updatedName === null) return;
+
+    const updatedGender = prompt(
+      'Genre (Féminin/Masculin) :',
+      patient.gender || 'Féminin'
+    );
+    if (updatedGender === null) return;
+
+    const updatedBirthDate = prompt(
+      'Date de naissance (YYYY-MM-DD) :',
+      patient.birthDate || ''
+    );
+    if (updatedBirthDate === null) return;
+
+    const updatedReason = prompt('Motif :', patient.reason);
+    if (updatedReason === null) return;
+
+    const updatedStatus = prompt('Statut :', patient.status);
+    if (updatedStatus === null) return;
+
+    const response = await fetch('/api/patients/', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: patient.id,
+        time: updatedTime.trim() || patient.time,
+        name: updatedName.trim().toUpperCase() || patient.name,
+        gender: updatedGender.trim() || patient.gender || 'Non précisé',
+        birthDate: updatedBirthDate.trim() || patient.birthDate || '',
+        reason: updatedReason.trim().toUpperCase() || patient.reason,
+        status: updatedStatus.trim().toUpperCase() || patient.status
+      })
+    });
+
+    if (!response.ok) {
+      alert('Erreur lors de la modification du patient.');
+      return;
+    }
+
+    const updatedPatient = await response.json();
+
+    patients[index] = {
+      id: updatedPatient.id,
+      time: updatedPatient.time,
+      name: updatedPatient.name,
+      gender: updatedPatient.gender,
+      birthDate: updatedPatient.birthDate,
+      reason: updatedPatient.reason,
+      status: updatedPatient.status
+    };
+
+    renderPatients();
+
+    alert('Patient modifié avec succès.');
+  });
+});
+    document.querySelectorAll('[data-patient-delete]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const index = Number(button.dataset.patientDelete);
+
+    if (Number.isNaN(index)) return;
+
+    const patient = patients[index];
+
+    if (!patient || !patient.id) {
+      alert('Patient introuvable.');
+      return;
+    }
+
+    const response = await fetch('/api/patients/', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: patient.id
+      })
+    });
+
+    if (!response.ok) {
+      alert('Erreur lors de la suppression du patient.');
+      return;
+    }
+
+    patients.splice(index, 1);
+
+    renderPatients();
+
+    alert('Patient supprimé avec succès.');
+  });
+});
+        }
+
+      async function loadInvoicesFromDjango() {
+  try {
+    const response = await fetch('/api/invoices/');
+
+    if (!response.ok) {
+      console.error('Erreur lors du chargement des factures.');
+      return;
+    }
+
+    const data = await response.json();
+
+    invoices.splice(0, invoices.length);
+
+    data.forEach((invoice) => {
+      invoices.push({
+        id: invoice.id,
+        patient: invoice.patient,
+        amount: invoice.amount,
+        paid: invoice.paid,
+        dueDate: invoice.dueDate,
+        status: invoice.status
+      });
+    });
+
+    renderInvoices();
+
+  } catch (error) {
+    console.error('Erreur de connexion à Django :', error);
+  }
+}
+        function renderInvoices() {
+          if (!invoicesTableBody) return;
+          invoicesTableBody.innerHTML = invoices.map((invoice, index) => {
+            const total = Number(invoice.amount) || 0;
+            const paid = Number(invoice.paid) || 0;
+            const remaining = Math.max(total - paid, 0);
+            const computedStatus = remaining <= 0 ? 'Complet' : (paid > 0 ? 'Partiellement versé' : 'Versé');
+            const status = invoice.status || computedStatus;
+
+            return `
+              <tr>
+                <td>${invoice.id}</td>
+                <td>${invoice.patient}</td>
+                <td>${total} DZ</td>
+                <td>${paid} DZ</td>
+                <td>${remaining} DZ</td>
+                <td>${invoice.dueDate}</td>
+                <td>${status}</td>
+                <td>
+                  <button type="button" data-invoice-edit="${index}">Modifier</button>
+                  <button type="button" data-invoice-delete="${index}">Supprimer</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+
+          document.querySelectorAll('[data-invoice-edit]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const index = Number(button.dataset.invoiceEdit);
+    const invoice = invoices[index];
+
+    if (!invoice) return;
+
+    const updatedPatient = prompt('Patient :', invoice.patient);
+    if (updatedPatient === null) return;
+
+    const updatedAmount = prompt('Prix complet :', invoice.amount);
+    if (updatedAmount === null) return;
+
+    const updatedPaid = prompt('Versé :', invoice.paid ?? 0);
+    if (updatedPaid === null) return;
+
+    const updatedDueDate = prompt('Échéance (YYYY-MM-DD) :', invoice.dueDate);
+    if (updatedDueDate === null) return;
+
+    const numericAmount = Number(updatedAmount);
+    const numericPaid = Number(updatedPaid);
+
+    if (!Number.isFinite(numericAmount) || !Number.isFinite(numericPaid)) {
+      alert('Le montant doit être un nombre valide.');
+      return;
+    }
+
+    const nextRemaining = Math.max(numericAmount - numericPaid, 0);
+
+    const nextStatus =
+      nextRemaining <= 0
+        ? 'Complet'
+        : numericPaid > 0
+          ? 'Partiellement versé'
+          : 'Versé';
+
+    try {
+      const response = await fetch('/api/invoices/', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: invoice.id,
+          patient: updatedPatient.trim() || invoice.patient,
+          amount: numericAmount,
+          paid: numericPaid,
+          dueDate: updatedDueDate.trim() || invoice.dueDate,
+          status: nextStatus
+        })
+      });
+
+      if (!response.ok) {
+        alert('Erreur lors de la modification de la facture.');
+        return;
+      }
+
+      const updatedInvoice = await response.json();
+
+      invoices[index] = {
+        id: updatedInvoice.id,
+        patient: updatedInvoice.patient,
+        amount: updatedInvoice.amount,
+        paid: updatedInvoice.paid,
+        dueDate: updatedInvoice.dueDate,
+        status: updatedInvoice.status
+      };
+
+      renderInvoices();
+
+      alert('Facture modifiée avec succès.');
+
+    } catch (error) {
+      console.error(
+        'Erreur lors de la modification de la facture :',
+        error
+      );
+
+      alert('Impossible de contacter le serveur.');
+    }
+  });
+});
+
+          document.querySelectorAll('[data-invoice-delete]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const index = Number(button.dataset.invoiceDelete);
+
+    if (Number.isNaN(index)) return;
+
+    const invoice = invoices[index];
+
+    if (!invoice || !invoice.id) {
+      alert('Facture introuvable.');
+      return;
+    }
+
+    console.log('SUPPRESSION FACTURE ENVOYÉE', invoice.id);
+
+    const response = await fetch('/api/invoices/', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: invoice.id
+      })
+    });
+
+    if (!response.ok) {
+      alert('Erreur lors de la suppression de la facture.');
+      return;
+    }
+
+    invoices.splice(index, 1);
+
+    renderInvoices();
+
+    alert('Facture supprimée avec succès.');
+  });
+});
+        }
+       
+        function renderAppointments() {
+          const appointmentTableBody = document.getElementById('appointments-list');
+          if (!appointmentTableBody) return;
+
+          appointmentTableBody.innerHTML = appointments.map((appointment, index) => `
+            <tr>
+              <td>${appointment.time}</td>
+              <td>${appointment.type}</td>
+              <td>${appointment.available ? 'Oui' : 'Non'}</td>
+              <td>
+                <button type="button" data-appointment-index="${index}">Modifier</button>
+              </td>
+              <td>
+                <button type="button" data-appointment-delete="${index}">Supprimer</button>
+              </td>
+            </tr>
+          `).join('');
+
+          document.querySelectorAll('[data-appointment-index]').forEach((button) => {
+           button.addEventListener('click', async () => {
+              const index = Number(button.dataset.appointmentIndex);
+              const appointment = appointments[index];
+              if (!appointment) return;
+
+              const updatedTime = prompt('Heure :', appointment.time);
+              if (updatedTime === null) return;
+
+              const updatedType = prompt('Type de consultation :', appointment.type);
+              if (updatedType === null) return;
+
+              const updatedAvailability = prompt('Disponibilité (Oui/Non) :', appointment.available ? 'Oui' : 'Non');
+              if (updatedAvailability === null) return;
+              console.log("PUT ENVOYÉ :", JSON.stringify({
+  id: appointment.id,
+  time: updatedTime.trim() || appointment.time,
+  reason: updatedType.trim() || appointment.type,
+  status: updatedAvailability.trim().toLowerCase() === 'oui'
+    ? 'En attente'
+    : 'Non'
+}));
+
+              const response = await fetch('/api/appointments/', {
+              method: 'PUT',
+              headers: {
+              'Content-Type': 'application/json'
+                 },
+              body: JSON.stringify({
+               id: appointment.id,
+              time: updatedTime.trim() || appointment.time,
+              reason: updatedType.trim() || appointment.type,
+              status: updatedAvailability.trim().toLowerCase() === 'oui'
+               ? 'En attente'
+              : 'Non'
+               })
+                 });
+
+              if (!response.ok) {
+             alert('Erreur lors de la modification du rendez-vous.');
+              return;
+               }
+
+                const updatedAppointment = await response.json();
+
+             appointments[index] = {
+               ...appointment,
+              time: updatedAppointment.time,
+               type: updatedAppointment.reason,
+               available: updatedAppointment.status !== 'Annulé'
+                  };
+               renderAppointments();
+
+               alert('Rendez-vous modifié avec succès.');  
+                    });
+                });
+
+          document.querySelectorAll('[data-appointment-delete]').forEach((button) => {
+            button.addEventListener('click', async () => {
+              const index = Number(button.dataset.appointmentDelete);
+              if (Number.isNaN(index)) return;
+              const appointment = appointments[index];
+if (!appointment) return;
+
+const response = await fetch('/api/appointments/', {
+  method: 'DELETE',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    id: appointment.id
+  })
+});
+
+if (!response.ok) {
+  alert('Erreur lors de la suppression du rendez-vous.');
+  return;
+}
+
+appointments.splice(index, 1);
+renderAppointments();
+
+alert('Rendez-vous supprimé avec succès.');
+            });
+          });
+        }
+
+        
+        if (togglePasswordButton && doctorPasswordInput) {
+          togglePasswordButton.addEventListener('click', () => {
+            const isHidden = doctorPasswordInput.type === 'password';
+            doctorPasswordInput.type = isHidden ? 'text' : 'password';
+            togglePasswordButton.textContent = isHidden ? '🙈' : '👁';
+            togglePasswordButton.setAttribute('aria-label', isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+          });
+        }
+
+        document.getElementById('add-patient-btn')?.addEventListener('click', () => {
+          showDashboardPage('#patients');
+        });
+
+        document.getElementById('add-appointment-btn')?.addEventListener('click', () => {
+          showDashboardPage('#rendez-vous');
+        });
+
+        document.getElementById('create-invoice-btn')?.addEventListener('click', () => {
+          showDashboardPage('#factures');
+        });
+
+        const patientForm = document.getElementById('patient-form');
+        const patientTimeInput = document.getElementById('patient-time');
+        const patientNameInput = document.getElementById('patient-name');
+        const patientGenderInput = document.getElementById('patient-gender');
+        const patientBirthDateInput = document.getElementById('patient-birthdate');
+        const patientReasonInput = document.getElementById('patient-reason');
+        const patientStatusInput = document.getElementById('patient-status');
+
+        if (patientForm) {
+  patientForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const patientName = patientNameInput.value.trim();
+    const patientTime = patientTimeInput.value.trim();
+    const patientGender = patientGenderInput.value.trim();
+    const patientBirthDate = patientBirthDateInput.value.trim();
+    const patientReason = patientReasonInput.value.trim();
+    const patientStatus = patientStatusInput.value.trim();
+
+    if (!patientName) {
+      alert('Le nom du patient est obligatoire.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/patients/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: patientName.toUpperCase(),
+          time: patientTime || '',
+          gender: patientGender || 'Non précisé',
+          birthDate: patientBirthDate || '',
+          reason: patientReason || 'CONSULTATION',
+          status: patientStatus || 'EN ATTENTE'
+        })
+      });
+
+      if (!response.ok) {
+        alert('Erreur lors de l’ajout du patient.');
+        return;
+      }
+
+      const newPatient = await response.json();
+
+      patients.push({
+        id: newPatient.id,
+        time: newPatient.time,
+        name: newPatient.name,
+        gender: newPatient.gender,
+        birthDate: newPatient.birthDate,
+        reason: newPatient.reason,
+        status: newPatient.status
+      });
+
+      renderPatients();
+      patientForm.reset();
+
+      alert('Patient ajouté avec succès.');
+
+    } catch (error) {
+      console.error('Erreur lors de l’ajout du patient :', error);
+      alert('Impossible de contacter le serveur.');
+    }
+  });
+}
+
+
+        const invoiceForm = document.getElementById('invoice-form');
+        const invoiceIdInput = document.getElementById('invoice-id');
+        const invoicePatientInput = document.getElementById('invoice-patient');
+        const invoiceAmountInput = document.getElementById('invoice-amount');
+        const invoicePaidInput = document.getElementById('invoice-paid');
+        const invoiceDueDateInput = document.getElementById('invoice-due-date');
+        const invoiceStatusInput = document.getElementById('invoice-status');
+
+        if (invoiceForm) {
+  invoiceForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const invoiceId = invoiceIdInput.value.trim();
+    const patientName = invoicePatientInput.value.trim();
+    const amountValue = Number(invoiceAmountInput.value);
+    const paidValue = Number(invoicePaidInput.value || 0);
+    const dueDate = invoiceDueDateInput.value.trim();
+    const invoiceStatus = invoiceStatusInput.value.trim();
+
+    if (!invoiceId) {
+      alert('Le numéro de facture est obligatoire.');
+      return;
+    }
+
+    if (!Number.isFinite(amountValue)) {
+      alert('Le prix complet doit être un nombre valide.');
+      return;
+    }
+
+    if (!dueDate) {
+      alert("La date d'échéance est obligatoire.");
+      return;
+    }
+
+    const normalizedStatus =
+      invoiceStatus ||
+      (paidValue >= amountValue
+        ? 'Complet'
+        : paidValue > 0
+          ? 'Partiellement versé'
+          : 'Versé');
+
+    try {
+      console.log('FACTURE ENVOYÉE À DJANGO');
+      const response = await fetch('/api/invoices/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          patient: patientName || 'PATIENT INCONNU',
+          amount: amountValue,
+          paid: paidValue,
+          dueDate: dueDate,
+          status: normalizedStatus
+        })
+      });
+
+      if (!response.ok) {
+        alert("Erreur lors de l'ajout de la facture.");
+        return;
+      }
+
+      const newInvoice = await response.json();
+
+      invoices.push({
+        id: newInvoice.id,
+        patient: newInvoice.patient,
+        amount: newInvoice.amount,
+        paid: newInvoice.paid,
+        dueDate: newInvoice.dueDate,
+        status: newInvoice.status
+      });
+
+      renderInvoices();
+      invoiceForm.reset();
+
+      alert('Facture ajoutée avec succès.');
+
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la facture :", error);
+      alert("Impossible de contacter le serveur.");
+    }
+  });
+}
+
+        const appointmentForm = document.getElementById('appointment-form');
+        const appointmentTimeInput = document.getElementById('appointment-time');
+        const appointmentTypeInput = document.getElementById('appointment-type');
+        const appointmentStatusInput = document.getElementById('appointment-status');
+
+        if (appointmentForm) {
+          appointmentForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const appointmentTime = appointmentTimeInput.value.trim();
+            const appointmentType = appointmentTypeInput.value.trim();
+            const appointmentStatus = appointmentStatusInput.value.trim();
+
+            if (!appointmentTime || !appointmentType) {
+              alert('L\'heure et le type de rendez-vous sont obligatoires.');
+              return;
+            }
+
+            const response = await fetch('/api/appointments/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    patient_name: 'Patient',
+    date: new Date().toISOString().split('T')[0],
+    time: appointmentTime,
+    reason: appointmentType,
+    status: appointmentStatus || 'En attente'
+  })
+});
+
+if (!response.ok) {
+  alert('Erreur lors de l’ajout du rendez-vous.');
+  return;
+}
+
+appointmentForm.reset();
+alert('Rendez-vous ajouté avec succès.');
+          });
+        }
+
+        const showAdviceBtn = document.getElementById('show-advice-btn');
+        const adviceBox = document.getElementById('advice-box');
+        const adviceText = document.getElementById('advice-text');
+        const supportBtn = document.getElementById('support-btn');
+        const contactForm = document.getElementById('contact-form');
+        const contactSuccess = document.getElementById('contact-success');
+        const dossierForm = document.getElementById('dossier-form');
+
+        const dailyAdviceList = [
+          'Buvez suffisamment d’eau chaque jour pour garder votre énergie et votre hydratation au top.',
+          'Une bonne nuit de sommeil aide votre système immunitaire et améliore votre récupération.',
+          'Faites une petite marche quotidienne pour améliorer votre circulation et votre bien-être général.',
+          'Écoutez votre corps et prenez des pauses régulières si vous êtes stressé ou fatigué.',
+          'Mangez équilibré avec des fruits, des légumes et des repas bien répartis durant la journée.',
+          'Suivez votre traitement à heure fixe et ne manquez pas les rendez-vous de suivi.',
+          'Gardez une routine de repos et de mouvement pour mieux gérer votre santé au quotidien.',
+          'Restez bien hydraté et évitez de trop charger votre organisme avec du stress et de la fatigue.'
+        ];
+
+        function getDailyAdvice() {
+          const today = new Date();
+          const dayNumber = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
+          return dailyAdviceList[dayNumber % dailyAdviceList.length];
+        }
+
+        if (adviceText) {
+          adviceText.textContent = getDailyAdvice();
+        }
+        const dossierNameInput = document.getElementById('dossier-name');
+        const dossierBirthDateInput = document.getElementById('dossier-birthdate');
+        const dossierDiagnosisInput = document.getElementById('dossier-diagnosis');
+        const dossierTreatmentInput = document.getElementById('dossier-treatment');
+        const dossierLastVisitInput = document.getElementById('dossier-last-visit');
+        const dossierNotesInput = document.getElementById('dossier-notes');
+        const dossierSummary = document.getElementById('dossier-summary');
+        const dossierSelect = document.getElementById('dossier-patient-select');
+        const dossierNewBtn = document.getElementById('dossier-new-btn');
+        const dossierDeleteBtn = document.getElementById('dossier-delete-btn');
+
+       async function loadDossiersFromDjango() {
+  try {
+    const response = await fetch('/api/medical-records/');
+
+    if (!response.ok) {
+      console.error('Erreur lors du chargement des dossiers médicaux.');
+      return;
+    }
+
+    const data = await response.json();
+    console.log('DOSSIERS REÇUS DE DJANGO :', data);
+
+    const dossiers = {};
+
+    data.forEach((record) => {
+      dossiers[record.patient] = {
+        id: record.id,
+        name: record.patient,
+        birthDate: record.birthDate,
+        diagnosis: record.diagnosis,
+        treatment: record.treatment,
+        lastVisit: record.lastVisit,
+        notes: record.notes
+      };
+    });
+
+    localStorage.setItem(
+      'medicalmelissa_dossiers',
+      JSON.stringify(dossiers)
+    );
+    renderDossierOptions();
+    console.log(
+  'SELECT APRÈS RENDER :',
+  document.getElementById('dossier-patient-select')?.innerHTML
+);
+    
+
+  } catch (error) {
+    console.error(
+      'Erreur de connexion à Django pour les dossiers :',
+      error
+    );
+  }
+}
+      function resetDossierForm() {
+          if (dossierNameInput) dossierNameInput.value = '';
+          if (dossierBirthDateInput) dossierBirthDateInput.value = '';
+          if (dossierDiagnosisInput) dossierDiagnosisInput.value = '';
+          if (dossierTreatmentInput) dossierTreatmentInput.value = '';
+          if (dossierLastVisitInput) dossierLastVisitInput.value = '';
+          if (dossierNotesInput) dossierNotesInput.value = '';
+          if (dossierSelect) dossierSelect.value = '';
+          renderDossierSummary(null);
+        }
+        function renderDossierOptions() {
+  if (!dossierSelect) return;
+  const dossiers = loadSavedData('medicalmelissa_dossiers', {});
+  const uniquePatientNames = Object.keys(dossiers);
+
+  dossierSelect.innerHTML =
+    '<option value="">Choisir un patient</option>' +
+    uniquePatientNames
+      .map((name) => '<option value="' + name + '">' + name + '</option>')
+      .join('');
+
+  if (uniquePatientNames.length > 0 && !dossierNameInput?.value.trim()) {
+    dossierNameInput.value = uniquePatientNames[0];
+
+    const record = loadSavedData('medicalmelissa_dossiers', {});
+    const selectedRecord = record[uniquePatientNames[0]] || {};
+
+    dossierBirthDateInput.value = selectedRecord.birthDate || '';
+    dossierDiagnosisInput.value = selectedRecord.diagnosis || '';
+    dossierTreatmentInput.value = selectedRecord.treatment || '';
+    dossierLastVisitInput.value = selectedRecord.lastVisit || '';
+    dossierNotesInput.value = selectedRecord.notes || '';
+  }
+}
+        
+        function renderDossierSummary(patientName) {
+          if (!dossierSummary) return;
+
+          const dossiers = loadSavedData('medicalmelissa_dossiers', {});
+          const selected = patientName ? dossiers[patientName] : null;
+
+          if (!selected) {
+            dossierSummary.textContent = 'Aucun dossier sélectionné pour le moment.';
+            return;
+          }
+
+          dossierSummary.innerHTML = `
+            <strong>${selected.name || patientName}</strong><br>
+            Naissance : ${selected.birthDate || 'Non renseignée'}<br>
+            Diagnostic : ${selected.diagnosis || 'Non renseigné'}<br>
+            Traitement : ${selected.treatment || 'Non renseigné'}<br>
+            Dernière visite : ${selected.lastVisit || 'Non renseignée'}<br>
+            Notes : ${selected.notes || 'Aucune note'}
+          `;
+        }
+
+        if (showAdviceBtn && adviceBox && adviceText) {
+          showAdviceBtn.addEventListener('click', () => {
+            adviceText.textContent = getDailyAdvice();
+            adviceBox.style.display = 'block';
+            adviceBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+        }
+
+        if (dossierSelect) {
+          dossierSelect.addEventListener('change', (event) => {
+            const patientName = event.target.value;
+            if (!patientName) {
+              dossierNameInput.value = '';
+              dossierBirthDateInput.value = '';
+              dossierDiagnosisInput.value = '';
+              dossierTreatmentInput.value = '';
+              dossierLastVisitInput.value = '';
+              dossierNotesInput.value = '';
+              renderDossierSummary(null);
+              return;
+            }
+
+            dossierNameInput.value = patientName;
+            const dossiers = loadSavedData('medicalmelissa_dossiers', {});
+            const dossier = dossiers[patientName] || {};
+            dossierBirthDateInput.value = dossier.birthDate || '';
+            dossierDiagnosisInput.value = dossier.diagnosis || '';
+            dossierTreatmentInput.value = dossier.treatment || '';
+            dossierLastVisitInput.value = dossier.lastVisit || '';
+            dossierNotesInput.value = dossier.notes || '';
+            renderDossierSummary(patientName);
+          });
+        }
+
+       if (dossierForm) {
+  dossierForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const dossierName = dossierNameInput.value.trim();
+    console.log('DOSSIER : formulaire envoyé');
+
+    if (!dossierName) {
+      alert('Le nom du patient est obligatoire pour enregistrer le dossier.');
+      return;
+    }
+
+    const birthDate = dossierBirthDateInput.value;
+    const diagnosis = dossierDiagnosisInput.value.trim();
+    const treatment = dossierTreatmentInput.value.trim();
+    const lastVisit = dossierLastVisitInput.value;
+    const notes = dossierNotesInput.value.trim();
+
+    try {
+      const dossiers = loadSavedData('medicalmelissa_dossiers', {});
+      const existingDossier = dossiers[dossierName];
+
+      const response = await fetch('/api/medical-records/', {
+        method: existingDossier?.id ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...(existingDossier?.id ? { id: existingDossier.id } : {}),
+          patient: dossierName,
+          birthDate: birthDate,
+          diagnosis: diagnosis,
+          treatment: treatment,
+          lastVisit: lastVisit,
+          notes: notes
+        })
+      });
+
+      if (!response.ok) {
+        alert("Erreur lors de l'enregistrement du dossier médical.");
+        return;
+      }
+
+      const savedRecord = await response.json();
+
+      dossiers[dossierName] = {
+        id: savedRecord.id,
+        name: savedRecord.patient,
+        birthDate: savedRecord.birthDate,
+        diagnosis: savedRecord.diagnosis,
+        treatment: savedRecord.treatment,
+        lastVisit: savedRecord.lastVisit,
+        notes: savedRecord.notes
+      };
+
+      localStorage.setItem(
+        'medicalmelissa_dossiers',
+        JSON.stringify(dossiers)
+      );
+
+      renderDossierOptions();
+
+      if (dossierSelect) {
+        dossierSelect.value = dossierName;
+      }
+
+      renderDossierSummary(dossierName);
+
+      alert('Dossier médical enregistré avec succès.');
+
+    } catch (error) {
+      console.error(
+        "Erreur lors de l'enregistrement du dossier :",
+        error
+      );
+
+      alert("Impossible de contacter le serveur.");
+    }
+  });
+}
+        if (dossierNewBtn) {
+          dossierNewBtn.addEventListener('click', () => {
+            resetDossierForm();
+            alert('Formulaire de dossier réinitialisé.');
+          });
+        }
+
+        if (dossierDeleteBtn) {
+  dossierDeleteBtn.addEventListener('click', async () => {
+    const dossierName = dossierNameInput.value.trim();
+
+    if (!dossierName) {
+      alert('Aucun dossier sélectionné pour la suppression.');
+      return;
+    }
+
+    const dossiers = loadSavedData('medicalmelissa_dossiers', {});
+    const dossier = dossiers[dossierName];
+
+    if (!dossier || !dossier.id) {
+      alert('Ce dossier n’existe pas.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/medical-records/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: dossier.id
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || 'Erreur lors de la suppression du dossier.');
+        return;
+      }
+
+      delete dossiers[dossierName];
+
+      saveData(
+        'medicalmelissa_dossiers',
+        dossiers
+      );
+
+      resetDossierForm();
+      renderDossierOptions();
+
+      alert('Dossier supprimé avec succès.');
+
+    } catch (error) {
+      console.error(
+        'Erreur lors de la suppression du dossier :',
+        error
+      );
+
+      alert('Impossible de contacter le serveur Django.');
+    }
+  });
+}
+
+        if (supportBtn) {
+          supportBtn.addEventListener('click', () => {
+            showDashboardPage('#contact');
+          });
+        }
+
+        if (contactForm) {
+  contactForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const contactName =
+      document.getElementById('contact-name')?.value.trim();
+
+    const contactEmail =
+      document.getElementById('contact-email')?.value.trim();
+
+    const contactMessage =
+      document.getElementById('contact-message')?.value.trim();
+
+    if (!contactName || !contactMessage) {
+      alert('Le nom et le message sont obligatoires.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/contact/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: contactName,
+          email: contactEmail || '',
+          message: contactMessage
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.error || 'Erreur lors de l’envoi du message.');
+        return;
+      }
+
+      contactForm.reset();
+
+      if (contactSuccess) {
+        contactSuccess.style.display = 'block';
+        contactSuccess.textContent =
+          'Votre message a bien été envoyé. Nous vous répondrons rapidement.';
+      }
+
+      alert('Message envoyé avec succès.');
+
+    } catch (error) {
+      console.error('Erreur lors de l’envoi du contact :', error);
+      alert('Impossible de contacter le serveur Django.');
+    }
+  });
+}
+
+        const nav = document.querySelector('nav');
+        if (nav) {
+          nav.addEventListener('click', (event) => {
+            const link = event.target.closest('a');
+            if (!link) return;
+
+            const targetId = link.getAttribute('href');
+            const protectedRoutes = ['#dashboard', '#patients', '#rendez-vous', '#factures', '#dossiers', '#conseils', '#contact'];
+
+            if (targetId === '#accueil') {
+              event.preventDefault();
+              publicView.style.display = 'block';
+              dashboardView.style.display = 'none';
+              dashboardPages.forEach((page) => {
+                page.style.display = 'none';
+              });
+              document.getElementById('accueil')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              return;
+            }
+
+            if (protectedRoutes.includes(targetId)) {
+              const isLoggedIn = document.body.dataset.authenticated === 'true';
+              if (!isLoggedIn) {
+                event.preventDefault();
+                alert('Veuillez vous connecter pour accéder à cette section.');
+                return;
+              }
+
+              event.preventDefault();
+              publicView.style.display = 'none';
+              dashboardView.style.display = 'block';
+              showDashboardPage(targetId);
+            }
+          });
+        }
+
+        if (document.body.dataset.authenticated === 'true') {
+  showDashboardPage('#dashboard');
+}
+
+        renderPatients();
+        renderInvoices();
+        renderAppointments();
+        loadAppointmentsFromDjango();
+        await loadPatientsFromDjango();
+        await loadInvoicesFromDjango();
+        await loadDossiersFromDjango();
+});
+  
+    </script>
+  </body>
+</html>
+
+      
