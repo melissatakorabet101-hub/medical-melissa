@@ -1,0 +1,21 @@
+{
+  "builds": [
+    {
+      "src": "manage.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/(.*)",
+      "dest": "manage.py"
+    }
+  ]
+}
