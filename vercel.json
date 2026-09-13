@@ -3,7 +3,7 @@
   "name": "medical-melissa",
   "cleanUrls": true,
   "builds": [
-    { "src": "index.html", "use": "@vercel/static" }
+    { "src": "**/*", "use": "@vercel/static" }
   ],
   "routes": [
     { "handle": "filesystem" },
