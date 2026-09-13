@@ -80,9 +80,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 DATABASE_URL = os.getenv('DATABASE_URL', '').strip()
+if not DATABASE_URL or not DATABASE_URL.split('://', 1)[0]:
+    DATABASE_URL = f"sqlite:///{BASE_DIR / 'db_clinique_a.sqlite3'}"
+
 DATABASES = {
     'default': dj_database_url.parse(
-        DATABASE_URL or f"sqlite:///{BASE_DIR / 'db_clinique_a.sqlite3'}",
+        DATABASE_URL,
         conn_max_age=600,
     )
 }
